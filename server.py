@@ -3,12 +3,15 @@ from flask import Flask, render_template, redirect, request, flash, session, jso
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
 import requests
+import pprint
 
 app = Flask(__name__)
 
 app.secret_key = "ABC"
 
 app.jinja_env.undefined = StrictUndefined
+
+access_token="536176452.1fb234f.f67ad8054ffe4f46aecff1b2e4c4b7c6"
 
 @app.route('/')
 def go_home():
@@ -18,17 +21,21 @@ def go_home():
 
 
 @app.route('/my-flight')
-def get_city_pics():
-	get_pics = requests.get('https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&access_token=536176452.1fb234f.f67ad8054ffe4f46aecff1b2e4c4b7c6')
-	print get_pics
-	pics = get_pics
-	return render_template("/my_flight.html", pics=pics)
+def media_search():
+	api = requests.get('https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&access_token=536176452.1fb234f.f67ad8054ffe4f46aecff1b2e4c4b7c6')
+
+	pics_json = api.json()
+	data_list = pics_json.get("data")
+	pics = []
+	for item in data_list:
+		images = item.get("images")
+		image_info = images.get("standard_resolution")
+		url = image_info.get("url")
+		pics.append(url)
+	return render_template("/my_flight.html", url=pics)
 
 
 if __name__ == "__main__":
 	app.debug = True
-
 	DebugToolbarExtension(app)
-
-
-app.run()
+	app.run()
