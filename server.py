@@ -12,7 +12,7 @@ app.jinja_env.undefined = StrictUndefined
 
 @app.route('/')
 	"""Homepage."""
-	print lots of changes 2
+	print "lots of changes again"
 	return render_template("base.html")
 
 
