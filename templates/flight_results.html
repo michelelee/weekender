@@ -1,0 +1,29 @@
+ 
+{% extends 'base.html' %}
+{% block content %}
+
+<div class><h3> Where do you want to go today? </h3> </div>
+<div>
+{% for flight_result in flight_results %}
+	<div> <h3> {{ brand }} manufactured by : {{ returned_drugs[key]["manufacturer_name"] }} </h3> </div>
+
+    <div><input type="button" class="search_flight" value="Let's Go!!!" data-flight-result="{{ flgiht_resutls[flight_result]['flight_id']}}"></div>     
+        <div>
+        <li> Price : {{ flight_results[flight_result]["price"] }} </li>
+        <li> Departure Time : {{ flight_results[flight_result]['departure_time'] }} </li>
+        </div> 
+{% endfor %}
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

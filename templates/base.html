@@ -29,14 +29,6 @@
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav navbar-right">
-      	{% if "user_id" in session %}
-        <li><a href="/user">{{ session['user_name'] }}'s Profile</a></li>
-        <li><a href="/logout">Logout</a></li>
-        <li>{{ meddr }}</li>
-        {% else %}
-        <li><a href="/register">Register</a></li>
-        <li><a href="/login">Login</a></li>
-        {% endif %}
       </ul>
     </div>
   </div>
