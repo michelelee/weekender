@@ -20,6 +20,15 @@ def go_home():
 	print result
 	return render_template("base.html")
 
+@app.route('/flight-results')
+def get_flight_results():
+	flight = "flight 1"
+	price = "price"
+	departure_time = "departure_time"
+	arrival_time = "arrival_time"
+	flight_results = [flight, price, departure_time, arrival_time]
+
+	return render_template("/flight_results.html", flight=flight, price=price, departure_time=departure_time, arrival_time=arrival_time, flight_results=flight_results)
 
 @app.route('/my-flight')
 def media_search():
