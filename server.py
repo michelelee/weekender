@@ -50,7 +50,6 @@ def get_flights_list(origin, duration):
 	tomorrow = today + datetime.timedelta(days=1)
 
 	departure_date_str = '--'.join([today.isoformat(), tomorrow.isoformat()])
-	print departure_date_str
 
 	api = requests.get(
 		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}'
@@ -63,7 +62,7 @@ def get_flights_list(origin, duration):
 	)
 
 	response_json = api.json()
-	return response_json
+	return response.get("results")
 
 
 if __name__ == "__main__":
