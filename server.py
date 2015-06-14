@@ -31,6 +31,14 @@ def get_flight_results():
 	return_date = depart_date + datetime.timedelta(days=duration)
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
+@app.route('/choose-theme', methods=['GET'])
+def choose_theme(theme):
+	headers = {'Authorization': 'Bearer Shared/IDL:IceSess\/SessMgr:1\.0.IDL/Common/!ICESMS\/ACPCRTD!ICESMSLB\/CRT.LB!-0123456789012345678!123456!0!ABCDEFGHIJKLM!E2E-1'}
+	api = requests.get('https://api.test.sabre.com/v1/lists/supported/shop/themes/' + theme, headers=headers)
+	api_json = api.json()
+	
+	return render_template('/theme_destinations.html', json=api_json)
+
 @app.route('/my-flight')
 def flight_details():
 	dest = request.args.get('dest')
