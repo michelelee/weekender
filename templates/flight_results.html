@@ -13,13 +13,13 @@
 	</div>
 
     <div>
-    <a href="/my-flight"><input type="button" id="search_flight" value="Let's Go!!!"></a>
+    <a href="/my-flight?dest={{flight_result.arrivalAirport.iata}}&carrier={{flight_result.carrier.iata}}&outbound_flight={{flight_result.flightNumber}}&depart_date={{depart_date}}&return_date={{return_date}}"><input type="button" id="search_flight" value="Let's Go!!!"></a>
     </div>     
  
         <div>
-        <li> Price : {{ flight_result.price}} </li>
-        <li> Departure Time : {{ flight_result.departureTime }} </li>
-        <li> Carrier: {{ flight_result.carrier.iata }} </li>
+        <li> Price: {{ flight_result.price}} </li>
+        <li> Departure Time: {{ flight_result.departureTime }} </li>
+        <li> Carrier: {{ flight_result.carrier.name }} </li>
         </div>
 {% endfor %}
 

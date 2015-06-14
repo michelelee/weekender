@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from keys import amadeus_token
 from keys import instagram_token
+from keys import sabre_token
 from mock_flightstats_api_response import SUNDAY_SCHEDULED_FLIGHTS
 import requests
 import pprint
@@ -20,16 +21,19 @@ DEFAULT_DURATION = 2
 
 @app.route('/')
 def get_flight_results():
-	price_by_destination = get_flight_prices('SFO', DEFAULT_DURATION)
+	depart_date = datetime.date.today()
+	duration = DEFAULT_DURATION
+	price_by_destination = get_flight_prices('SFO', depart_date, duration)
 	# TODO: filter flights list by theme
-	flights_with_price = get_scheduled_flights_with_price(price_by_destination)
-	#flight_details = get_flight_detail('SFO', flight['destination'], datetime.datetime.strptime(flight['departure_date'], '%Y-%m-%d'), flight['return_date'])
+	flights_with_price = get_scheduled_flights_with_price(SUNDAY_SCHEDULED_FLIGHTS, price_by_destination)
 
-	return render_template("/flight_results.html", flight_results=flights_with_price)
+	return_date = depart_date + datetime.timedelta(days=duration)
+	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
 @app.route('/my-flight')
 def media_search():
 	api = requests.get('https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&access_token={token}'.format(token=instagram_token))
+	#flight_details = get_flight_detail('SFO', flight['destination'], datetime.datetime.strptime(flight['departure_date'], '%Y-%m-%d'), flight['return_date'])
 
 	pics_json = api.json()
 	data_list = pics_json.get("data")
@@ -42,9 +46,22 @@ def media_search():
 
 	return render_template("/my_flight.html", url=pics[:6])
 
-def get_scheduled_flights_with_price(price_by_destination):
+def get_airline_names():
+	headers = {'Authorization': sabre_token}
+	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
+	airline_info = api.json()['AirlineInfo']
+	code_to_name = {}
+	for airline in airline_info:
+		code_to_name[airline['AirlineCode']] = airline['AirlineName']
+
+	return code_to_name
+
+
+def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
+	"""Merges flight schedules with pricing data"""
+	airline_names = get_airline_names()
 	result_flights = []
-	for flight in SUNDAY_SCHEDULED_FLIGHTS['scheduledFlights']:
+	for flight in scheduled_flights['scheduledFlights']:
 		departure_time = dateutil.parser.parse(flight['departureTime'])
 		# filter only flights past the current time
 		if departure_time > datetime.datetime.now():
@@ -52,6 +69,7 @@ def get_scheduled_flights_with_price(price_by_destination):
 				scheduled_flight = flight
 				scheduled_flight['price'] = price_by_destination[flight['arrivalAirport']['iata']]
 				scheduled_flight['departureTime'] = departure_time.strftime('%I:%M %p')
+				scheduled_flight['carrier']['name'] = airline_names.get(scheduled_flight['carrier']['iata'])
 				result_flights.append(scheduled_flight)
 
 	return result_flights
@@ -79,38 +97,14 @@ def get_flight_detail(origin, destination, departure_time, return_date):
 	print s
 	return response_json
 
-def get_flight_prices(origin, duration):
-	"""Returns a list of flight dicts, each containing the following:
-	{
-		"destination": "RIC",
-		"departure_date": "2015-09-09",
-		"return_date": "2015-09-16",
-		"price": "83.95",
-		"airline": "B6"
-	}, {
-		"destination": "SNA",
-		"departure_date": "2015-09-23",
-		"return_date": "2015-09-30",
-		"price": "368.70",
-		"airline": "UA"
-	}, {
-		"destination": "PAP",
-		"departure_date": "2015-09-10",
-		"return_date": "2015-09-17",
-		"price": "371.46",
-		"airline": "NK"
-	}
-	"""
-	today = datetime.date.today()
-	tomorrow = today #+ datetime.timedelta(days=1)
-
-	departure_date_str = '--'.join([today.isoformat(), tomorrow.isoformat()])
+def get_flight_prices(origin, depart_date, duration):
+	"""Returns a mapping from destination to roundtrip flight price from the specified origin."""
 
 	api = requests.get(
 		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}'
 		'&departure_date={departure}&duration={duration}&max_price=20000&direct=true&apikey={token}'.format(
 			origin=origin,
-			departure=departure_date_str,
+			departure=depart_date.isoformat(),
 			duration=duration,
 			token=amadeus_token
 		)

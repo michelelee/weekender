@@ -1,3 +1,4 @@
+"""Data scraped from flightstats.com and formatted to match their API response"""
 SUNDAY_SCHEDULED_FLIGHTS = {
 	'scheduledFlights': 
 	[
