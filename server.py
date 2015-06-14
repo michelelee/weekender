@@ -32,7 +32,8 @@ def media_search():
 		image_info = images.get("standard_resolution")
 		url = image_info.get("url")
 		pics.append(url)
-	return render_template("/my_flight.html", url=pics)
+
+	return render_template("/my_flight.html", url=pics[:6])
 
 
 if __name__ == "__main__":
