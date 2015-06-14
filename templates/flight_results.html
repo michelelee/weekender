@@ -2,19 +2,29 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class><h3> Where do you want to go today? </h3> </div>
+<div>
+	<h3> Where do you want to go today? </h3> 
+</div>
 <div>
 {% for flight_result in flight_results %}
-	<div> <h3> {{ flight }} </h3> </div>
 
-    <div><input type="button" class="search_flight" value="Let's Go!!!" data-flight-result="{{ flight }}"></div>     
+	<div> 
+	<h3> {{ flight }} </h3> 
+	</div>
+
+    <div>
+    <a href="/my-flight"><input type="button" id="search_flight" value="Let's Go!!!" data-flight-result="{{ flight_results }}"></a>
+    </div>     
+ 
         <div>
         <li> Price : {{ price}} </li>
         <li> Departure Time : {{ departure_time }} </li>
-        <li> Arrival Time: {{ arrival_time }}
-        </div> 
+        <li> Arrival Time: {{ arrival_time }} </li>
+        </div>
 {% endfor %}
+
 </div>
-
-
+<script type="text/javascript">
+$.post(url_for("")
+</script>
 {% endblock %}

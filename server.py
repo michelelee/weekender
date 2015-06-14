@@ -14,12 +14,6 @@ app.jinja_env.undefined = StrictUndefined
 access_token="536176452.1fb234f.f67ad8054ffe4f46aecff1b2e4c4b7c6"
 
 @app.route('/')
-def go_home():
-	"""Homepage."""
-	print "lots of changes again"
-	return render_template("base.html")
-
-@app.route('/flight-results')
 def get_flight_results():
 	flight = "flight 1"
 	price = "price"
