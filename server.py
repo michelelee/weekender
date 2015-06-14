@@ -14,13 +14,6 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 @app.route('/')
-def go_home():
-	"""Homepage."""
-	result = get_flights_list('SFO', 2)
-	print result
-	return render_template("base.html")
-
-@app.route('/flight-results')
 def get_flight_results():
 	flight = "flight 1"
 	price = "price"
