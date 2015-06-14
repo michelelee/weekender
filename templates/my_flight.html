@@ -1,9 +1,40 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{% for item in url %}
-<span> <img src="{{ item }}" class="image_size"> </span>
-{% endfor %}
+<div class="image_container" style="background-image: url('{{url[0]}}');background-size:cover">
 
+	<div class="result_box">
+		<h1 class="airport_code">{{dest}}</h2>
+		<h3 class="city_name">{{city_name}}</h3>
+		{% if outbound_flight %}
+		<div class="flight_listing">
+			<h4 class="flight_direction">Outbound</h4>
+			<span class="flight_info">{{outbound_flight.carrier}} {{outbound_flight.flight_number}}</span>
+			<br/>
+			Depart: {{outbound_flight.depart}}
+			<br/>
+			Arrive: {{outbound_flight.arrive}}
+		</div>
+		<div class="flight_listing">
+			<h4 class="flight_direction">Return</h4>
+			<span class="flight_info">{{inbound_flight.carrier}} {{inbound_flight.flight_number}}</span>
+			<br/>
+			Depart: {{inbound_flight.depart}}
+			<br/>
+			Arrive: {{inbound_flight.arrive}}
+		</div>
+		<a href="{{booking_link}}" class="booking_button">
+			Book - ${{fare.total_price}} ➜
+		</a>
+		{% else %}
+		<h4>Flight not available.</h4>
+		{% endif %}
+		<div class="photos">
+		{% for item in url[1:7] %}
+			<span> <img src="{{ item }}" class="image_size"> </span>
+		{% endfor %}
+		</div>
+	</div>
+</div>
 
 {% endblock %}
