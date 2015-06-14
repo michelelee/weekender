@@ -146,12 +146,11 @@ def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 		# filter only flights past the current time + 1 hour
 		if departure_time > datetime.datetime.now() + datetime.timedelta(hours=1):
 			if flight['arrivalAirport']['iata'] in price_by_destination:
-				scheduled_flight = flight
+				scheduled_flight = flight.copy()
 				scheduled_flight['price'] = price_by_destination[flight['arrivalAirport']['iata']]
 				scheduled_flight['departureTime'] = departure_time.strftime('%I:%M %p')
 				scheduled_flight['carrier']['name'] = airline_names.get(scheduled_flight['carrier']['iata'])
 				result_flights.append(scheduled_flight)
-	print len(result_flights)
 	return result_flights
 
 def filter_flight_prices_by_theme(flight_prices, theme):
