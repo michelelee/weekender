@@ -1,28 +1,29 @@
  
 {% extends 'base.html' %}
 {% block content %}
-
-<div>
-	<h3> Departing __today__ from SFO to <br/>__beach__ destinations, <br/>returning in __2__ days </h3> 
-</div>
-<div>
-{% for flight_result in flight_results %}
-
-	<div> 
-	<h3> {{ flight_result.arrivalAirport.iata }} </h3> 
-	</div>
-
+<div class="inner_container">
     <div>
-    <a href="/my-flight?dest={{flight_result.arrivalAirport.iata}}&carrier={{flight_result.carrier.iata}}&outbound_flight={{flight_result.flightNumber}}&depart_date={{depart_date}}&return_date={{return_date}}"><input type="button" id="search_flight" value="Let's Go!!!"></a>
-    </div>     
- 
-        <div>
-        <li> Price: {{ flight_result.price}} </li>
-        <li> Departure Time: {{ flight_result.departureTime }} </li>
-        <li> Carrier: {{ flight_result.carrier.name }} </li>
-        </div>
-{% endfor %}
+    	<h3> Departing __today__ from SFO to <br/>__beach__ destinations, <br/>returning in __2__ days </h3> 
+    </div>
+    <div>
+    {% for flight_result in flight_results %}
 
+    	<div> 
+    	<h3> {{ flight_result.arrivalAirport.iata }} </h3> 
+    	</div>
+
+        <div>
+        <a href="/my-flight?dest={{flight_result.arrivalAirport.iata}}&carrier={{flight_result.carrier.iata}}&outbound_flight={{flight_result.flightNumber}}&depart_date={{depart_date}}&return_date={{return_date}}"><input type="button" id="search_flight" value="Let's Go!!!"></a>
+        </div>     
+     
+            <div>
+            <li> Price: from ${{ flight_result.price}} </li>
+            <li> Departure Time: {{ flight_result.departureTime }} </li>
+            <li> Carrier: {{ flight_result.carrier.name }} </li>
+            </div>
+    {% endfor %}
+
+    </div>
 </div>
 <script type="text/javascript">
 //$.post(url_for("")

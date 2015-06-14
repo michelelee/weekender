@@ -1,5 +1,6 @@
 import datetime
 import dateutil.parser
+import json
 from flask import Flask, render_template, redirect, request, flash, session, jsonify, json
 from jinja2 import StrictUndefined
 from flask_debugtoolbar import DebugToolbarExtension
@@ -31,31 +32,80 @@ def get_flight_results():
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
 @app.route('/my-flight')
-def media_search():
-	api = requests.get('https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&access_token={token}'.format(token=instagram_token))
-	#flight_details = get_flight_detail('SFO', flight['destination'], datetime.datetime.strptime(flight['departure_date'], '%Y-%m-%d'), flight['return_date'])
+def flight_details():
+	dest = request.args.get('dest')
+	carrier = request.args.get('carrier')
+	outbound_flight = request.args.get('outbound_flight')
+	depart_date = request.args.get('depart_date')
+	return_date = request.args.get('return_date')
+
+	airline_names = get_airline_names()
+
+	flight_itinerary, fare = get_flight_detail('SFO', dest, carrier, outbound_flight, depart_date, return_date)
+	outbound_flight = None
+	inbound_flight = None
+	booking_link = None
+
+	if flight_itinerary:
+		outbound = flight_itinerary['outbound']['flights'][0]
+		outbound_flight = {
+			'depart': dateutil.parser.parse(outbound['departs_at']).strftime('%a, %b %d %I:%M %p'),
+			'arrive': dateutil.parser.parse(outbound['arrives_at']).strftime('%a, %b %d %I:%M %p'),
+			'carrier': airline_names.get(outbound['marketing_airline']),
+			'flight_number': outbound['flight_number']
+		}
+
+		inbound = flight_itinerary['inbound']['flights'][0]
+		inbound_flight = {
+			'depart': dateutil.parser.parse(inbound['departs_at']).strftime('%a, %b %d %I:%M %p'),
+			'arrive': dateutil.parser.parse(inbound['arrives_at']).strftime('%a, %b %d %I:%M %p'),
+			'carrier': airline_names.get(inbound['marketing_airline']),
+			'flight_number': inbound['flight_number']
+		}
+
+		booking_link = 'https://www.google.com/flights/#search;f=SFO;t={dest};d={depart_date};r={return_date};'\
+		'sel=SFO{dest}0{depart_carrier}{depart_flight},{dest}SFO0{return_carrier}{return_flight}'.format(
+			dest=dest,
+			depart_date=depart_date,
+			return_date=return_date,
+			depart_carrier=outbound['marketing_airline'],
+			depart_flight=outbound['flight_number'],
+			return_carrier=inbound['marketing_airline'],
+			return_flight=inbound['flight_number']
+		)
+
+	dest_city_info = get_city_info(dest)
+
+	api = requests.get('https://api.instagram.com/v1/media/search?lat={lat}&lng={lng}&access_token={token}'.format(
+			lat=dest_city_info['city']['location']['latitude'],
+			lng=dest_city_info['city']['location']['longitude'],
+			token=instagram_token
+		)
+	)
 
 	pics_json = api.json()
 	data_list = pics_json.get("data")
+	sorted_list = sorted(data_list, key=lambda k:k['likes']['count'], reverse=True)
 	pics = []
-	for item in data_list:
+	for item in sorted_list:
 		images = item.get("images")
 		image_info = images.get("standard_resolution")
 		url = image_info.get("url")
-		pics.append(url)
 
-	return render_template("/my_flight.html", url=pics[:6])
+		# some basic heuristic to match better photos
+		if not len(item['users_in_photo']):
+			pics.append(url)
 
-def get_airline_names():
-	headers = {'Authorization': sabre_token}
-	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
-	airline_info = api.json()['AirlineInfo']
-	code_to_name = {}
-	for airline in airline_info:
-		code_to_name[airline['AirlineCode']] = airline['AirlineName']
-
-	return code_to_name
-
+	return render_template(
+		"/my_flight.html",
+		url=pics[:7],
+		dest=dest,
+		city_name=dest_city_info['city']['name'], 
+		outbound_flight=outbound_flight,
+		inbound_flight=inbound_flight,
+		fare=fare,
+		booking_link=booking_link
+	)
 
 def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 	"""Merges flight schedules with pricing data"""
@@ -63,8 +113,8 @@ def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 	result_flights = []
 	for flight in scheduled_flights['scheduledFlights']:
 		departure_time = dateutil.parser.parse(flight['departureTime'])
-		# filter only flights past the current time
-		if departure_time > datetime.datetime.now():
+		# filter only flights past the current time + 1 hour
+		if departure_time > datetime.datetime.now() + datetime.timedelta(hours=1):
 			if flight['arrivalAirport']['iata'] in price_by_destination:
 				scheduled_flight = flight
 				scheduled_flight['price'] = price_by_destination[flight['arrivalAirport']['iata']]
@@ -74,31 +124,68 @@ def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 
 	return result_flights
 
-def get_flight_detail(origin, destination, departure_time, return_date):
-	"""departure_time is a datetime object"""
-	departure_date = departure_time.date().isoformat()
+def get_airline_names():
+	"""Queries the Sabre Airline Info API to map airline codes to their names"""
+	headers = {'Authorization': sabre_token}
+	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
+	airline_info = api.json()['AirlineInfo']
+	code_to_name = {}
+	for airline in airline_info:
+		code_to_name[airline['AirlineCode']] = airline['AirlineName']
+
+	return code_to_name
+
+def get_city_info(airport_code):
+	"""Queries the Amadeus Location Services API to fetch city information for the given airport"""
+	api = requests.get('http://api.sandbox.amadeus.com/v1.2/location/{airport}/?apikey={token}'.format(
+			airport=airport_code,
+			token=amadeus_token
+		)
+	)
+	response_json = api.json()
+
+	# if airport_code was actually a city code, no need to fetch city data again since our result already contains it
+	if 'city' not in response_json:
+		city_code = response_json['airports'][0]['city_code']
+		api = requests.get('http://api.sandbox.amadeus.com/v1.2/location/{city}/?apikey={token}'.format(
+				city=city_code,
+				token=amadeus_token
+			)
+		)
+		response_json = api.json()
+
+	return response_json
+
+
+
+def get_flight_detail(origin, destination, carrier, outbound_flight, depart_date, return_date):
+	"""Calls into the Amadeus Low Fare Search API to fetch itineraries for the specified parameters"""
 	api = requests.get('http://api.sandbox.amadeus.com/v1.2/flights/low-fare-search?origin={origin}'
 		'&destination={destination}&departure_date={departure_date}&return_date={return_date}&direct=true&apikey={token}'.format(
 			origin=origin,
 			destination=destination,
-			departure_date=departure_date,
+			departure_date=depart_date,
 			return_date=return_date,
 			token=amadeus_token
 		)
 	)
-
 	response_json = api.json()
+	return _get_best_itinerary_for_outbound_flight(response_json, carrier, outbound_flight)
 
-	# find the first returned itinerary with the specified departure time (list is already sorted by price)
-	s = 0
-	for result in response_json['results']:
+def _get_best_itinerary_for_outbound_flight(flight_search_results, marketing_carrier, outbound_flight):
+	# find the first returned itinerary with the specified outbound flight number
+	for result in flight_search_results['results']:
 		for itinerary in result['itineraries']:
-			s += 1 # do something more than this
-	print s
-	return response_json
+			flight_number = itinerary['outbound']['flights'][0]['flight_number']
+			carrier = itinerary['outbound']['flights'][0]['marketing_airline']
+			if flight_number == outbound_flight and carrier == marketing_carrier:
+				return itinerary, result['fare']
+
+	return None, None
 
 def get_flight_prices(origin, depart_date, duration):
-	"""Returns a mapping from destination to roundtrip flight price from the specified origin."""
+	"""Queries the Amadeus Inspiration Search API to fetch pricing data for direct flights from the specified origin.
+	Returns a mapping from destination to roundtrip flight price."""
 
 	api = requests.get(
 		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}'
@@ -121,5 +208,4 @@ def get_flight_prices(origin, depart_date, duration):
 
 if __name__ == "__main__":
 	app.debug = True
-	DebugToolbarExtension(app)
 	app.run()
