@@ -5,25 +5,16 @@
 <div class><h3> Where do you want to go today? </h3> </div>
 <div>
 {% for flight_result in flight_results %}
-	<div> <h3> {{ brand }} manufactured by : {{ returned_drugs[key]["manufacturer_name"] }} </h3> </div>
+	<div> <h3> {{ flight }} </h3> </div>
 
-    <div><input type="button" class="search_flight" value="Let's Go!!!" data-flight-result="{{ flgiht_resutls[flight_result]['flight_id']}}"></div>     
+    <div><input type="button" class="search_flight" value="Let's Go!!!" data-flight-result="{{ flight }}"></div>     
         <div>
-        <li> Price : {{ flight_results[flight_result]["price"] }} </li>
-        <li> Departure Time : {{ flight_results[flight_result]['departure_time'] }} </li>
+        <li> Price : {{ price}} </li>
+        <li> Departure Time : {{ departure_time }} </li>
+        <li> Arrival Time: {{ arrival_time }}
         </div> 
 {% endfor %}
 </div>
-
-{% endblock %}
-
-
-
-
-
-
-
-
 
 
 {% endblock %}
