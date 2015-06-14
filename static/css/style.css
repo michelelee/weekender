@@ -1,5 +1,83 @@
+select {
+	-webkit-appearance: none;
+	background-color: transparent;
+	border: none;
+	color: rgb(20, 20, 255);
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
 .image_size {
 	height: auto;
 	max-width: 100px;
 	display: inline-block;
+}
+
+.result_box {
+	text-align: center;
+	background-color: rgba(210, 210, 210, 0.8);
+	width: auto;
+	height: 100%;
+	padding: 20px 20px 20px 20px;
+}
+
+.airport_code {
+	font-weight: bold;
+	margin-top: 10px;
+	font-size: 48px;
+}
+
+.city_name {
+	margin-top: 10px;
+	margin-bottom: 15px;
+}
+
+.flight_listing {
+	margin-top: 10px;
+}
+
+.flight_direction {
+	font-weight: bold;
+}
+
+.flight_info {
+	color: #333;
+	font-weight: bold;
+}
+
+.booking_button {
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 36px;
+	color: #666;
+}
+
+.booking_button:hover {
+	color: #999;
+	text-decoration: none;
+}
+
+.photos {
+	margin-top: 20px;
+}
+
+.image_container {
+	height: 100%;
+	padding: 10% 10% 10% 10%;
+}
+
+.inner_container {
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+.container {
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.navbar {
+	margin-bottom: 0;
 }
