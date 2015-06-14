@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{{ pics }}
+{% for item in url %}
+<span> <img src="{{ item }}" class="image_size"> </span>
 
 
+{% endfor %}
 {% endblock %}
