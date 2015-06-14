@@ -18,22 +18,33 @@ app.secret_key = "ABC"
 
 app.jinja_env.undefined = StrictUndefined
 
-DEFAULT_DURATION = 2
+DEFAULT_DATE = datetime.date.today()
+DEFAULT_DURATION = 3
+DEFAULT_THEME = ''
 
 @app.route('/')
-def get_flight_results():
-	depart_date = datetime.date.today()
+def home():
+	depart_date = DEFAULT_DATE
 	duration = DEFAULT_DURATION
-	theme = 'BEACH'
+	theme = DEFAULT_THEME
 
-	price_by_destination = filter_flight_prices_by_theme(
-		get_flight_prices('SFO', depart_date, duration),
-		theme
-	)
-
-	flights_with_price = get_scheduled_flights_with_price(SUNDAY_SCHEDULED_FLIGHTS, price_by_destination)
+	flights_with_price = get_flight_results(depart_date, duration, theme)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
+	return render_template("/list_view.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
+
+@app.route('/flight-results')
+def ajax_flight_results():
+	date_option = request.args.get('date_option') # either 'today' or 'tomorrow'
+	duration = int(request.args.get('duration'))
+	theme = request.args.get('theme') # one of ['', 'BEACH', 'GAMBLING', 'HISTORIC', 'OUTDOORS', 'ROMANTIC', 'SHOPPING', 'THEME-PARK']
+
+	# allow tomorrow too
+	depart_date = datetime.date.today()
+	flights_with_price = get_flight_results(depart_date, duration, theme)
+
+	return_date = depart_date + datetime.timedelta(days=duration)
+
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
 
@@ -112,6 +123,16 @@ def flight_details():
 		fare=fare,
 		booking_link=booking_link
 	)
+
+def get_flight_results(depart_date, duration, theme):
+	price_by_destination = filter_flight_prices_by_theme(
+		get_flight_prices('SFO', depart_date, duration),
+		theme
+	)
+
+	# add monday flights too
+	return get_scheduled_flights_with_price(SUNDAY_SCHEDULED_FLIGHTS, price_by_destination)
+
 
 def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 	"""Merges flight schedules with pricing data"""

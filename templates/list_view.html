@@ -1,0 +1,61 @@
+ 
+{% extends 'base.html' %}
+{% block content %}
+<div class="inner_container">
+    <div>
+    	<h3>Departing 
+            <select id='date_option'>
+                <option value='today' selected>today</option>
+                <option value='tomorrow'>tomorrow</option>
+            </select>
+        from SFO
+        <br/>
+        to
+        <select id='theme'>
+            <option value='' selected>all</option>
+            <option value='BEACH'>beach</option>
+            <option value='GAMBLING'>gambling</option>
+            <option value='HISTORIC'>historic</option>
+            <option value='OUTDOORS'>outdoorsy</option>
+            <option value='ROMANTIC'>romantic</option>
+            <option value='SHOPPING'>shopping</option>
+            <option value='THEME-PARK'>theme park</option>
+        </select>
+        destinations,
+        <br/>
+        returning in 
+        <select id='duration'>
+            <option value='2'>2</option>
+            <option value='3' selected>3</option>
+            <option value='4'>4</option>
+            <option value='5'>5</option>
+            <option value='6'>6</option>
+            <option value='7'>7</option>
+        </select>
+        days 
+        </h3> 
+    </div>
+    <div id="flight_results">
+        {% include 'flight_results.html' %}
+    </div>
+</div>
+<script type="text/javascript">
+function reload_results(){
+    var date_option = $("#date_option")[0].value;
+    var theme = $("#theme")[0].value;
+    var duration = $("#duration")[0].value;
+    var get_data = {
+        date_option: date_option,
+        theme: theme,
+        duration: duration
+    }
+    console.log(get_data);
+    $.get("/flight-results?", get_data, function(data){$("#flight_results").html(data)});
+}
+
+$("select").change(function(){
+    reload_results();
+});
+//$.post(url_for("")
+</script>
+{% endblock %}
