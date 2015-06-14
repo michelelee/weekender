@@ -1,45 +1,48 @@
  
 {% extends 'base.html' %}
 {% block content %}
-<div class="inner_container">
-    <div>
-    	<h3><p>Departing 
-            <select id='date_option'>
-                <option value='today' selected>&nbsp;&nbsp;&nbsp;&nbsp;today</option>
-                <option value='tomorrow'>tomorrow</option>
+<div class="background_container">
+    <div class="inner_container">
+    <h1 class="app_name">weekender.</h1>
+        <div class="option_selector">
+        	<h3><p>Departing 
+                <select id='date_option'>
+                    <option value='today' selected>&nbsp;&nbsp;&nbsp;&nbsp;today</option>
+                    <option value='tomorrow'>tomorrow</option>
+                </select>
+            from SFO
+            </p>
+            <p>
+            to
+            <select id='theme'>
+                <option value='' selected>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all</option>
+                <option value='BEACH'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beach</option>
+                <option value='GAMBLING'>&nbsp;&nbsp;gambling</option>
+                <option value='HISTORIC'>&nbsp;&nbsp;&nbsp;&nbsp;historic</option>
+                <option value='OUTDOORS'>&nbsp;outdoorsy</option>
+                <option value='ROMANTIC'>&nbsp;&nbsp;romantic</option>
+                <option value='SHOPPING'>&nbsp;&nbsp;shopping</option>
+                <option value='THEME-PARK'>theme park</option>
             </select>
-        from SFO
-        </p>
-        <p>
-        to
-        <select id='theme'>
-            <option value='' selected>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all</option>
-            <option value='BEACH'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;beach</option>
-            <option value='GAMBLING'>&nbsp;&nbsp;gambling</option>
-            <option value='HISTORIC'>&nbsp;&nbsp;&nbsp;&nbsp;historic</option>
-            <option value='OUTDOORS'>&nbsp;outdoorsy</option>
-            <option value='ROMANTIC'>&nbsp;&nbsp;romantic</option>
-            <option value='SHOPPING'>&nbsp;&nbsp;shopping</option>
-            <option value='THEME-PARK'>theme park</option>
-        </select>
-        destinations,
-        </p>
-        <p>
-        returning in 
-        <select id='duration'>
-            <option value='2'>2</option>
-            <option value='3' selected>3</option>
-            <option value='4'>4</option>
-            <option value='5'>5</option>
-            <option value='6'>6</option>
-            <option value='7'>7</option>
-        </select>
-        days
-        </p>
-        </h3> 
-    </div>
-    <div id="flight_results">
-        {% include 'flight_results.html' %}
+            destinations
+            </p>
+            <p>
+            and returning in 
+            <select id='duration'>
+                <option value='2'>2</option>
+                <option value='3' selected>3</option>
+                <option value='4'>4</option>
+                <option value='5'>5</option>
+                <option value='6'>6</option>
+                <option value='7'>7</option>
+            </select>
+            days
+            </p>
+            </h3> 
+        </div>
+        <div id="flight_results">
+            {% include 'flight_results.html' %}
+        </div>
     </div>
 </div>
 <script type="text/javascript">

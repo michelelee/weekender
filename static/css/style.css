@@ -7,6 +7,46 @@ select {
 	margin-right: 2px;
 }
 
+.app_name {
+	font-size: 100px;
+	font-weight: bold;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.option_selector {
+	margin-top: 30px;
+	text-align: center;
+	margin-bottom: 40px;
+}
+
+.flight_result {
+	padding: 5px 0 5px 0;
+	position: relative;
+}
+
+.flight_result a{
+	text-decoration: none;
+	color: #666;
+}
+
+.flight_entry h1,
+.flight_entry h2{
+	display: inline;
+	margin-right: 3px;
+}
+
+.carrier_description {
+	margin-left: 3px;
+}
+
+.price_callout {
+	position: absolute;
+	right: 0;
+	line-height: 48px;
+	margin-top: 10px;
+}
+
 .image_size {
 	height: auto;
 	max-width: 100px;
@@ -67,6 +107,14 @@ select {
 }
 
 .inner_container {
+	max-width: 500px;
+}
+
+.background_container {
+	background-image: url('/static/luggage.jpg');
+	background-position: right;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
 	padding-left: 15px;
 	padding-right: 15px;
 }
