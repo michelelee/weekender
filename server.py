@@ -8,6 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from keys import amadeus_token
 from keys import instagram_token
 from keys import sabre_token
+from mock_flightstats_api_response import MONDAY_SCHEDULED_FLIGHTS
 from mock_flightstats_api_response import SUNDAY_SCHEDULED_FLIGHTS
 import requests
 import pprint
@@ -28,7 +29,7 @@ def home():
 	duration = DEFAULT_DURATION
 	theme = DEFAULT_THEME
 
-	flights_with_price = get_flight_results(depart_date, duration, theme)
+	flights_with_price = get_flight_results(depart_date, duration, theme, SUNDAY_SCHEDULED_FLIGHTS)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
 	return render_template("/list_view.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
@@ -39,9 +40,13 @@ def ajax_flight_results():
 	duration = int(request.args.get('duration'))
 	theme = request.args.get('theme') # one of ['', 'BEACH', 'GAMBLING', 'HISTORIC', 'OUTDOORS', 'ROMANTIC', 'SHOPPING', 'THEME-PARK']
 
-	# allow tomorrow too
-	depart_date = datetime.date.today()
-	flights_with_price = get_flight_results(depart_date, duration, theme)
+	if date_option == 'tomorrow':
+		depart_date = datetime.date.today() + datetime.timedelta(days=1)
+		scheduled_flights = MONDAY_SCHEDULED_FLIGHTS
+	else:
+		depart_date = datetime.date.today()
+		scheduled_flights = SUNDAY_SCHEDULED_FLIGHTS
+	flights_with_price = get_flight_results(depart_date, duration, theme, scheduled_flights)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
@@ -123,14 +128,13 @@ def flight_details():
 		booking_link=booking_link
 	)
 
-def get_flight_results(depart_date, duration, theme):
+def get_flight_results(depart_date, duration, theme, scheduled_flights):
 	price_by_destination = filter_flight_prices_by_theme(
 		get_flight_prices('SFO', depart_date, duration),
 		theme
 	)
 
-	# add monday flights too
-	return get_scheduled_flights_with_price(SUNDAY_SCHEDULED_FLIGHTS, price_by_destination)
+	return get_scheduled_flights_with_price(scheduled_flights, price_by_destination)
 
 
 def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
@@ -147,7 +151,7 @@ def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 				scheduled_flight['departureTime'] = departure_time.strftime('%I:%M %p')
 				scheduled_flight['carrier']['name'] = airline_names.get(scheduled_flight['carrier']['iata'])
 				result_flights.append(scheduled_flight)
-
+	print len(result_flights)
 	return result_flights
 
 def filter_flight_prices_by_theme(flight_prices, theme):
