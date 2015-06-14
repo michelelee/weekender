@@ -24,20 +24,18 @@ DEFAULT_DURATION = 2
 def get_flight_results():
 	depart_date = datetime.date.today()
 	duration = DEFAULT_DURATION
-	price_by_destination = get_flight_prices('SFO', depart_date, duration)
-	# TODO: filter flights list by theme
+	theme = 'BEACH'
+
+	price_by_destination = filter_flight_prices_by_theme(
+		get_flight_prices('SFO', depart_date, duration),
+		theme
+	)
+
 	flights_with_price = get_scheduled_flights_with_price(SUNDAY_SCHEDULED_FLIGHTS, price_by_destination)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
-@app.route('/choose-theme', methods=['GET'])
-def choose_theme(theme):
-	headers = {'Authorization': 'Bearer Shared/IDL:IceSess\/SessMgr:1\.0.IDL/Common/!ICESMS\/ACPCRTD!ICESMSLB\/CRT.LB!-0123456789012345678!123456!0!ABCDEFGHIJKLM!E2E-1'}
-	api = requests.get('https://api.test.sabre.com/v1/lists/supported/shop/themes/' + theme, headers=headers)
-	api_json = api.json()
-	
-	return render_template('/theme_destinations.html', json=api_json)
 
 @app.route('/my-flight')
 def flight_details():
@@ -132,6 +130,29 @@ def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 
 	return result_flights
 
+def filter_flight_prices_by_theme(flight_prices, theme):
+	"""Queries the Sabre API for airports matching the given theme, then filters the list of flights to only these airports"""
+	# no theme specified, just return everything
+	if not theme:
+		return flight_prices
+
+	headers = {'Authorization': sabre_token}
+	api = requests.get('https://api.test.sabre.com/v1/lists/supported/shop/themes/' + theme, headers=headers)
+	destinations = api.json()['Destinations']
+
+	airport_codes = []
+	for destination in destinations:
+		airport_codes.append(destination['Destination'])
+
+	filtered_prices = {}
+
+	for theme_airport in airport_codes:
+		if theme_airport in flight_prices:
+			filtered_prices[theme_airport] = flight_prices[theme_airport]
+
+	return filtered_prices
+
+
 def get_airline_names():
 	"""Queries the Sabre Airline Info API to map airline codes to their names"""
 	headers = {'Authorization': sabre_token}
@@ -165,9 +186,8 @@ def get_city_info(airport_code):
 	return response_json
 
 
-
 def get_flight_detail(origin, destination, carrier, outbound_flight, depart_date, return_date):
-	"""Calls into the Amadeus Low Fare Search API to fetch itineraries for the specified parameters"""
+	"""Queries the Amadeus Low Fare Search API to fetch itineraries for the specified parameters"""
 	api = requests.get('http://api.sandbox.amadeus.com/v1.2/flights/low-fare-search?origin={origin}'
 		'&destination={destination}&departure_date={departure_date}&return_date={return_date}&direct=true&apikey={token}'.format(
 			origin=origin,
