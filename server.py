@@ -44,7 +44,6 @@ def ajax_flight_results():
 	flights_with_price = get_flight_results(depart_date, duration, theme)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
-
 	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
 
@@ -223,12 +222,13 @@ def get_flight_detail(origin, destination, carrier, outbound_flight, depart_date
 
 def _get_best_itinerary_for_outbound_flight(flight_search_results, marketing_carrier, outbound_flight):
 	# find the first returned itinerary with the specified outbound flight number
-	for result in flight_search_results['results']:
-		for itinerary in result['itineraries']:
-			flight_number = itinerary['outbound']['flights'][0]['flight_number']
-			carrier = itinerary['outbound']['flights'][0]['marketing_airline']
-			if flight_number == outbound_flight and carrier == marketing_carrier:
-				return itinerary, result['fare']
+	if 'results' in flight_search_results:
+		for result in flight_search_results['results']:
+			for itinerary in result['itineraries']:
+				flight_number = itinerary['outbound']['flights'][0]['flight_number']
+				carrier = itinerary['outbound']['flights'][0]['marketing_airline']
+				if flight_number == outbound_flight and carrier == marketing_carrier:
+					return itinerary, result['fare']
 
 	return None, None
 
