@@ -23,6 +23,14 @@ def get_flight_results():
 
 	return render_template("/flight_results.html", flight=flight, price=price, departure_time=departure_time, arrival_time=arrival_time, flight_results=flight_results)
 
+@app.route('/choose-theme', methods=['GET'])
+def choose_theme(theme):
+	headers = {'Authorization': 'Bearer Shared/IDL:IceSess\/SessMgr:1\.0.IDL/Common/!ICESMS\/ACPCRTD!ICESMSLB\/CRT.LB!-0123456789012345678!123456!0!ABCDEFGHIJKLM!E2E-1'}
+	api = requests.get('https://api.test.sabre.com/v1/lists/supported/shop/themes/' + theme, headers=headers)
+	api_json = api.json()
+	
+	return render_template('/theme_destinations.html', json=api_json)
+
 @app.route('/my-flight')
 def media_search():
 	api = requests.get('https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&access_token={token}'.format(token=instagram_token))
