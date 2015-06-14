@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<ul>
-<li>{{ url }}</li>
-</ul>
+{% for item in url %}
+<span> <img src="{{ item }}" class="image_size"> </span>
 
+
+{% endfor %}
 {% endblock %}
