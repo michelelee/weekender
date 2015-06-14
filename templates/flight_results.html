@@ -3,28 +3,28 @@
 {% block content %}
 
 <div>
-	<h3> Where do you want to go today? </h3> 
+	<h3> Departing __today__ from SFO to <br/>__beach__ destinations, <br/>returning in __2__ days </h3> 
 </div>
 <div>
 {% for flight_result in flight_results %}
 
 	<div> 
-	<h3> {{ flight }} </h3> 
+	<h3> {{ flight_result.arrivalAirport.iata }} </h3> 
 	</div>
 
     <div>
-    <a href="/my-flight"><input type="button" id="search_flight" value="Let's Go!!!" data-flight-result="{{ flight_results }}"></a>
+    <a href="/my-flight"><input type="button" id="search_flight" value="Let's Go!!!"></a>
     </div>     
  
         <div>
-        <li> Price : {{ price}} </li>
-        <li> Departure Time : {{ departure_time }} </li>
-        <li> Arrival Time: {{ arrival_time }} </li>
+        <li> Price : {{ flight_result.price}} </li>
+        <li> Departure Time : {{ flight_result.departureTime }} </li>
+        <li> Carrier: {{ flight_result.carrier.iata }} </li>
         </div>
 {% endfor %}
 
 </div>
 <script type="text/javascript">
-$.post(url_for("")
+//$.post(url_for("")
 </script>
 {% endblock %}
