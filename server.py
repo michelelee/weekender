@@ -28,7 +28,7 @@ def choose_theme(theme):
 	headers = {'Authorization': 'Bearer Shared/IDL:IceSess\/SessMgr:1\.0.IDL/Common/!ICESMS\/ACPCRTD!ICESMSLB\/CRT.LB!-0123456789012345678!123456!0!ABCDEFGHIJKLM!E2E-1'}
 	api = requests.get('https://api.test.sabre.com/v1/lists/supported/shop/themes/' + theme, headers=headers)
 	api_json = api.json()
-	
+
 	return render_template('/theme_destinations.html', json=api_json)
 
 @app.route('/my-flight')
@@ -47,7 +47,7 @@ def media_search():
 	return render_template("/my_flight.html", url=pics[:6])
 
 def get_flights_list(origin, duration):
-	today = datetime.date.today() + datetime.timedelta(days=1) # this is a hack because amadeus sucks
+	today = datetime.date.today() + datetime.timedelta(days=1) # this is a hack
 	tomorrow = today + datetime.timedelta(days=1)
 
 	departure_date_str = '--'.join([today.isoformat(), tomorrow.isoformat()])
@@ -66,6 +66,15 @@ def get_flights_list(origin, duration):
 	response_json = api.json()
 	return response_json
 
+# @app.route('/while-you-wait', methods=['GET'])
+# def waiting_stuff():
+# 	# themes = [BEACH, DISNEY, GAMBLING, HISTORIC, MOUNTAINS, NATIONAL-PARKS, OUTDOORS, ROMANTIC, SHOPPING, SKIING, THEME-PARK, CARIBBEAN]
+# 	theme = "BEACH"
+# 	api_dining = requests.get('http://www.flysfo.com/api/dining.json?limit=20&key=895c8268164eba80cc14e44ba5b7b7f0')
+# 	dining_json = api_dining.json()
+
+# 	sfo_activities = { 'dining': 'none'}
+# 	return render_template("/while_you_wait.html", theme=theme, sfo_activities=sfo_activities)
 
 if __name__ == "__main__":
 	app.debug = True
