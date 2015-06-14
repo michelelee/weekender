@@ -15,9 +15,12 @@ app.jinja_env.undefined = StrictUndefined
 
 @app.route('/')
 def get_flight_results():
+	flights = get_flights_list('SFO', 2)
 	flight = "flight 1"
 	price = "price"
+	# currently we're only showing departure _date_, but we will show departure time later
 	departure_time = "departure_time"
+	# we don't need arrival time in this view
 	arrival_time = "arrival_time"
 	flight_results = [flight, price, departure_time, arrival_time]
 
@@ -39,6 +42,27 @@ def media_search():
 	return render_template("/my_flight.html", url=pics[:6])
 
 def get_flights_list(origin, duration):
+	"""Returns a list of flight dicts, each containing the following:
+	{
+		"destination": "RIC",
+		"departure_date": "2015-09-09",
+		"return_date": "2015-09-16",
+		"price": "83.95",
+		"airline": "B6"
+	}, {
+		"destination": "SNA",
+		"departure_date": "2015-09-23",
+		"return_date": "2015-09-30",
+		"price": "368.70",
+		"airline": "UA"
+	}, {
+		"destination": "PAP",
+		"departure_date": "2015-09-10",
+		"return_date": "2015-09-17",
+		"price": "371.46",
+		"airline": "NK"
+	}
+	"""
 	today = datetime.date.today() + datetime.timedelta(days=1) # this is a hack because amadeus sucks
 	tomorrow = today + datetime.timedelta(days=1)
 
