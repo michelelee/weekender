@@ -3,7 +3,6 @@ import dateutil.parser
 import json
 from flask import Flask, render_template, redirect, request, flash, session, jsonify, json
 from jinja2 import StrictUndefined
-from flask_debugtoolbar import DebugToolbarExtension
 
 from keys import amadeus_token
 from keys import instagram_token
@@ -257,6 +256,15 @@ def get_flight_prices(origin, depart_date, duration):
 
 	return price_by_destination
 
+# @app.route('/while-you-wait', methods=['GET'])
+# def waiting_stuff():
+# 	# themes = [BEACH, DISNEY, GAMBLING, HISTORIC, MOUNTAINS, NATIONAL-PARKS, OUTDOORS, ROMANTIC, SHOPPING, SKIING, THEME-PARK, CARIBBEAN]
+# 	theme = "BEACH"
+# 	api_dining = requests.get('http://www.flysfo.com/api/dining.json?limit=20&key=895c8268164eba80cc14e44ba5b7b7f0')
+# 	dining_json = api_dining.json()
+
+# 	sfo_activities = { 'dining': 'none'}
+# 	return render_template("/while_you_wait.html", theme=theme, sfo_activities=sfo_activities)
 
 if __name__ == "__main__":
 	app.debug = True
