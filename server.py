@@ -180,13 +180,12 @@ def get_airline_names():
 	"""Queries the Sabre Airline Info API to map airline codes to their names"""
 	headers = {'Authorization': sabre_token}
 	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
-	airline_info = api.json()
-	# ['AirlineInfo']
+	airline_info = api.json()['AirlineInfo']
 	print airline_info
-	# code_to_name = {}
-	code_to_name = airline_info
-	# for airline in airline_info:
-	# 	code_to_name[airline['AirlineCode']] = airline['AirlineName']
+	code_to_name = {}
+	# code_to_name = airline_info
+	for airline in airline_info:
+		code_to_name[airline['AirlineCode']] = airline['AirlineName']
 
 	return code_to_name
 
@@ -254,7 +253,8 @@ def get_flight_prices(origin, depart_date, duration):
 		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}'
 		'&departure_date={departure}&duration={duration}&max_price=20000&direct=true&apikey={token}'.format(
 			origin=origin,
-			departure=depart_date.isoformat(),
+			departure=depart_date,
+			# .isoformat(),
 			duration=duration,
 			token=amadeus_token
 		)
