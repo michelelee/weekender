@@ -40,15 +40,16 @@ def ajax_flight_results():
 	theme = request.args.get('theme') # one of ['', 'BEACH', 'GAMBLING', 'HISTORIC', 'OUTDOORS', 'ROMANTIC', 'SHOPPING', 'THEME-PARK']
 
 	if date_option == 'tomorrow':
-		depart_date = datetime.date.today() + datetime.timedelta(days=1)
+		depart_date = 2015-10-06
 		scheduled_flights = MONDAY_SCHEDULED_FLIGHTS
 	else:
-		depart_date = datetime.date.today()
+		# depart_date = datetime.date.today()
+		depart_date = 2015-10-06
 		scheduled_flights = SUNDAY_SCHEDULED_FLIGHTS
 	flights_with_price = get_flight_results(depart_date, duration, theme, scheduled_flights)
 
 	return_date = depart_date + datetime.timedelta(days=duration)
-	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
+	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date, return_date=return_date.isoformat())
 
 
 @app.route('/my-flight')
@@ -138,7 +139,7 @@ def get_flight_results(depart_date, duration, theme, scheduled_flights):
 
 def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 	"""Merges flight schedules with pricing data"""
-	airline_names = get_airline_names()
+	# airline_names = get_airline_names()
 	result_flights = []
 	for flight in scheduled_flights['scheduledFlights']:
 		departure_time = dateutil.parser.parse(flight['departureTime'])
@@ -179,10 +180,13 @@ def get_airline_names():
 	"""Queries the Sabre Airline Info API to map airline codes to their names"""
 	headers = {'Authorization': sabre_token}
 	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
-	airline_info = api.json()['AirlineInfo']
-	code_to_name = {}
-	for airline in airline_info:
-		code_to_name[airline['AirlineCode']] = airline['AirlineName']
+	airline_info = api.json()
+	# ['AirlineInfo']
+	print airline_info
+	# code_to_name = {}
+	code_to_name = airline_info
+	# for airline in airline_info:
+	# 	code_to_name[airline['AirlineCode']] = airline['AirlineName']
 
 	return code_to_name
 
@@ -194,6 +198,8 @@ def get_city_info(airport_code):
 		)
 	)
 	response_json = api.json()
+
+	print response_json
 
 	# if airport_code was actually a city code, no need to fetch city data again since our result already contains it
 	if 'city' not in response_json:
@@ -209,7 +215,13 @@ def get_city_info(airport_code):
 
 
 def get_flight_detail(origin, destination, carrier, outbound_flight, depart_date, return_date):
-	"""Queries the Amadeus Low Fare Search API to fetch itineraries for the specified parameters"""
+	"""Queries the Amadeus Low Fare Search API to fetch itineraries for the specified parameters
+
+	sample call should look like this:
+
+	http://api.sandbox.amadeus.com/v1.2/flights/low-fare-search?origin=SFO&destination=LAX&departure_date=2015-10-06&return_date=2015-10-07&direct=true&apikey=yuqY3bfBfuLkiAEjuXskO8GHGvu0xJPb
+
+	"""
 	api = requests.get('http://api.sandbox.amadeus.com/v1.2/flights/low-fare-search?origin={origin}'
 		'&destination={destination}&departure_date={departure_date}&return_date={return_date}&direct=true&apikey={token}'.format(
 			origin=origin,
