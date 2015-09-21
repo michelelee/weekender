@@ -30,6 +30,8 @@ def home():
 
 	flights_with_price = get_flight_results(depart_date, duration, theme, SUNDAY_SCHEDULED_FLIGHTS)
 
+	# print "flights with price" + flights_with_price
+
 	return_date = depart_date + datetime.timedelta(days=duration)
 	return render_template("/list_view.html", flight_results=flights_with_price, depart_date=depart_date.isoformat(), return_date=return_date.isoformat())
 
@@ -46,10 +48,17 @@ def ajax_flight_results():
 		# depart_date = datetime.date.today()
 		depart_date = 2015-10-06
 		scheduled_flights = SUNDAY_SCHEDULED_FLIGHTS
-	flights_with_price = get_flight_results(depart_date, duration, theme, scheduled_flights)
+		flights_with_price = get_flight_results(depart_date, duration, theme, scheduled_flights)
 
-	return_date = depart_date + datetime.timedelta(days=duration)
-	return render_template("/flight_results.html", flight_results=flights_with_price, depart_date=depart_date, return_date=return_date.isoformat())
+	# get flight results acutally returns the results_flight object, and its being reassigned to flights_with_price
+
+	return_date ='2015-10-07'
+
+	result_flights = get_scheduled_flights_with_price(scheduled_flight, price_by_destination)
+	# depart_date + datetime.timedelta(days=duration)
+	return render_template("/flight_results.html",flight_results=flights_with_price , depart_date=depart_date, return_date=return_date)
+
+	
 
 
 @app.route('/my-flight')
@@ -133,24 +142,36 @@ def get_flight_results(depart_date, duration, theme, scheduled_flights):
 		get_flight_prices('SFO', depart_date, duration),
 		theme
 	)
+	# print "price by destination"
+	# print price_by_destination
+	# print "/n/n/n"
+	# print scheduled_flights
 
 	return get_scheduled_flights_with_price(scheduled_flights, price_by_destination)
 
 
 def get_scheduled_flights_with_price(scheduled_flights, price_by_destination):
 	"""Merges flight schedules with pricing data"""
-	# airline_names = get_airline_names()
+	airline_names = get_airline_names()
+	# print airline_names
 	result_flights = []
 	for flight in scheduled_flights['scheduledFlights']:
 		departure_time = dateutil.parser.parse(flight['departureTime'])
 		# filter only flights past the current time + 1 hour
-		if departure_time > datetime.datetime.now() + datetime.timedelta(hours=1):
+		if departure_time:
+		# < datetime.datetime.now() + datetime.timedelta(hours=1):
 			if flight['arrivalAirport']['iata'] in price_by_destination:
 				scheduled_flight = flight.copy()
+				# print scheduled_flight
 				scheduled_flight['price'] = price_by_destination[flight['arrivalAirport']['iata']]
 				scheduled_flight['departureTime'] = departure_time.strftime('%I:%M %p')
 				scheduled_flight['carrier']['name'] = airline_names.get(scheduled_flight['carrier']['iata'])
 				result_flights.append(scheduled_flight)
+	# print scheduled_flight
+
+	print "\n \n \n"
+
+	print result_flights
 	return result_flights
 
 def filter_flight_prices_by_theme(flight_prices, theme):
@@ -181,7 +202,7 @@ def get_airline_names():
 	headers = {'Authorization': sabre_token}
 	api = requests.get('https://api.test.sabre.com/v1/lists/utilities/airlines', headers=headers)
 	airline_info = api.json()['AirlineInfo']
-	print airline_info
+	# print airline_info
 	code_to_name = {}
 	# code_to_name = airline_info
 	for airline in airline_info:
@@ -250,12 +271,10 @@ def get_flight_prices(origin, depart_date, duration):
 	Returns a mapping from destination to roundtrip flight price."""
 
 	api = requests.get(
-		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}'
-		'&departure_date={departure}&duration={duration}&max_price=20000&direct=true&apikey={token}'.format(
-			origin=origin,
-			departure=depart_date,
-			# .isoformat(),
-			duration=duration,
+		'http://api.sandbox.amadeus.com/v1.2/flights/inspiration-search?origin={origin}&departure_date={departure}&duration={duration}&max_price=20000&direct=true&apikey={token}'.format(
+			origin='SFO',
+			departure='2015-10-06',
+			duration=3,
 			token=amadeus_token
 		)
 	)

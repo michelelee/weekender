@@ -1,4 +1,5 @@
 {% for flight_result in flight_results %}
+
 <div class="flight_result">
     <a href="/my-flight?dest={{flight_result.arrivalAirport.iata}}&carrier={{flight_result.carrier.iata}}&outbound_flight={{flight_result.flightNumber}}&depart_date={{depart_date}}&return_date={{return_date}}">
     	<div> 
@@ -10,4 +11,20 @@
         </div>
     </a>
 </div>
+
+<div class="flight_result">
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</div>
+
 {% endfor %}
